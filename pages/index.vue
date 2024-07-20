@@ -33,6 +33,11 @@
             <v-list-item-content>
               <v-list-item-title>{{ file.name }}</v-list-item-title>
             </v-list-item-content>
+            <v-list-item-action>
+              <v-btn icon @click="deleteFile(file.name)">
+                <v-icon color="error">mdi-delete</v-icon>
+              </v-btn>
+            </v-list-item-action>
           </v-list-item>
         </v-list>
       </v-col>
@@ -40,7 +45,7 @@
 
     <v-snackbar
       v-model="snackbar"
-      :timeout="3000"
+      :timeout="2000"
       :color="snackbarColor"
       top
       center
@@ -68,25 +73,69 @@ export default {
       isUploading: false,
     }
   },
+  mounted() {
+    this.getUploadedFiles()
+  },
   methods: {
-    uploadFile() {
+    async getUploadedFiles() {
+      try {
+        const result = await this.$axios.get('/api/files')
+        this.files = result.data.files
+      } catch (error) {
+        this.files = []
+      }
+    },
+    async uploadFile() {
       if (!this.file) {
         this.snackbarColor = 'error'
         this.snackbar = true
         this.snackbarText = 'Please choose file before uploading'
         return
       }
+
+      const formData = new FormData()
+      formData.append('file', this.file)
       this.isUploading = true
 
-      // Here you would typically make an API call to upload the file
-      setTimeout(() => {
-        this.files.push({ name: this.file.name })
+      try {
+        await this.$axios.post('/api/files', formData, {
+          headers: {
+            'Content-Type': 'multipart/form-data',
+          },
+        })
+
         this.snackbarText = 'File uploaded successfully!'
         this.snackbarColor = 'success'
         this.snackbar = true
+
+        this.getUploadedFiles()
+      } catch (error) {
+        this.snackbarText = 'Failed to upload file'
+        if (error.response?.data?.error) {
+          this.snackbarText =
+            this.snackbarText + ' : ' + error.response.data.error
+        }
+        this.snackbarColor = 'error'
+        this.snackbar = true
+      } finally {
         this.file = null // Reset the input after upload
         this.isUploading = false
-      }, 2000)
+      }
+    },
+    async deleteFile(filename) {
+      try {
+        await this.$axios.delete('/api/files/' + filename)
+
+        this.getUploadedFiles()
+      } catch (error) {
+        this.snackbarText = 'Failed to delete file'
+        if (error.response?.data?.error) {
+          this.snackbarText =
+            this.snackbarText + ' : ' + error.response.data.error
+        }
+        this.snackbarColor = 'error'
+        this.snackbar = true
+      }
     },
   },
 }
