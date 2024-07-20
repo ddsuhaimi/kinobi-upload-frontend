@@ -2,7 +2,7 @@
 
 ## Demo:
 
-[Link text](https://main--keen-biscuit-de8c31.netlify.app/)
+[Demo](https://main--keen-biscuit-de8c31.netlify.app/)
 
 ## Prerequisites
 
