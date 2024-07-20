@@ -38,12 +38,12 @@ export default {
   modules: ['@nuxtjs/axios'],
   publicRuntimeConfig: {
     axios: {
-      baseURL: 'http://localhost:5001',
+      baseURL: process.env.BACKEND_URL || 'http://localhost:5001',
     },
   },
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
-    customVariables: ['~/assets/variables.scss'],
+    // customVariables: ['~/assets/variables.scss'],
     theme: {
       dark: true,
       themes: {
